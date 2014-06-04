@@ -5,7 +5,7 @@ Ext.define('Uploader.store.TypesTree', {
 
 	
 	root: {
-        text: 'agInfra repositories',
+        text: Uploader.Configs.repository + ' repositories ',
         expanded: true,
         id: 0
     },
@@ -13,7 +13,7 @@ Ext.define('Uploader.store.TypesTree', {
     proxy: {
         type: 'ajax',
         //url: '/django/mountTree/deroberto2/',
-        url: 'http://glibrary.ct.infn.it/django/mountTree/aginfra/',
+        url: 'http://glibrary.ct.infn.it/django/mountTree/' + Uploader.Configs.repository + '/',
         reader: {
             type: 'json'
         }

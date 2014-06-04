@@ -330,6 +330,9 @@ Ext.define('Ext.ux.upload.Panel', {
     },
 
     onUploadComplete : function(manager, queue, errorCount) {
+        console.log('uploadComplete');
+        console.log(queue);
+        console.log(errorCount);
         this.finishUpload();
         this.stateInit();
         this.fireEvent('uploadcomplete', this, manager, queue.getUploadedItems(), errorCount);
@@ -346,9 +349,36 @@ Ext.define('Ext.ux.upload.Panel', {
      * @param {FileList} files
      */
     onFileSelection : function(input, files) {
+        // here we should check if there are any metadata loaded in the editor
+        var metadatagrid = Ext.ComponentQuery.query('gridpanel')[1];
+        var metadataStore = metadatagrid.getStore();
+        if (metadataStore.getCount() == 0) {
+            Ext.MessageBox.alert('Error', 'You need to load the metadata first');
+            return;
+        }
+        var typestree = Ext.ComponentQuery.query('typestree')[0];
+        var selectedType = typestree.getSelectionModel().getSelection()[0];
+        if (!selectedType || selectedType.data.depth == 0) {
+            Ext.Msg.alert("Error","Please select a collection first!");
+            return;
+        }
+
+        console.log("going to select files");
+        console.log(files);
+        var validFiles = [];
+        for (var i = 0; i < files.length; i++) {            
+            if (metadataStore.find('nome_file', files[i].name) != -1) {
+                validFiles.push(files[i]);
+            }
+        };
+        console.log(validFiles);
+        
         this.queue.clearUploadedItems();
-        this.queue.addFiles(files);
+        // here we should check if selected file has metadata
+        this.queue.addFiles(validFiles);
+        //this.queue.addFiles(files);
         this.browseButton.reset();
+        this.browseButton.fileInputEl.dom.setAttribute('multiple', '1');
     },
 
     /**
@@ -391,7 +421,12 @@ Ext.define('Ext.ux.upload.Panel', {
     },
 
     onItemUploadSuccess : function(manager, item, info) {
-
+        console.log("ItemUploadSuccess");
+        var file = item.getFileApiObject();
+        console.log(file);
+        this.saveMetadata(file, item);
+        //console.log(info);
+        // here we should register its metadata
     },
 
     onItemUploadFailure : function(manager, item, info) {
@@ -482,6 +517,51 @@ Ext.define('Ext.ux.upload.Panel', {
             'button_remove_all' : 1,
             'button_remove_selected' : 1
         });
+    },
+
+    saveMetadata: function(file, item) {
+        console.log("save metadata")
+        var typestree = Ext.ComponentQuery.query('typestree')[0];
+        var selectedType = typestree.getSelectionModel().getSelection()[0];
+        if (!selectedType || selectedType.data.depth == 0) {
+            Ext.Msg.alert("Error","Please select a type first!");
+            return;
+        }
+
+        var metadatagrid = Ext.ComponentQuery.query('gridpanel')[1];
+        var metadataStore = metadatagrid.getStore();
+        var idx = metadataStore.find('nome_file', file.name);
+        var metadata = metadataStore.getAt(idx).getData();
+        delete metadata.id;
+        var datePattern = /(\d{2})\/(\d{2})\/(\d{4})/;
+        if (metadata.fine_indagine) {
+            metadata.fine_indagine = metadata.fine_indagine.replace(datePattern, '$3-$2-$1');
+        }
+        if (metadata.avvio_indagine) {
+            metadata.avvio_indagine = metadata.avvio_indagine.replace(datePattern, '$3-$2-$1');
+        }
+
+        var fname = file.name.replace(/ /g, "_");
+        
+        metadata.FileName = fname;
+        metadata.Size = file.size;
+        metadata.Replica = "https://" + Uploader.Configs.defaultSE + Uploader.Configs.defaultSEPath + "/" + fname;
+        console.log(metadata);
+        Ext.Ajax.request({
+            url: 'http://glibrary.ct.infn.it/django/saveMetadata' + selectedType.data.path + '/',
+            params: metadata,
+            success: function(response) {
+                console.log("Metadata saved successfully for file " + file.name);
+                //Ext.ComponentQuery.query('metadataeditor')[0].removeAll();
+                //Ext.Msg.alert("Success!", "Metadata added successfully");
+            },
+            failure: function(response) {
+                Ext.Msg.alert("Error","Cannot save metadata to the server for file " + file.name + ". Look at the error log");
+                item.setUploadError("Cannot save metadata to the server for file " + file.name + ". Look at the error log");
+                console.log("error while saving metadata");
+                console.log(response);
+            }
+        }); 
     }
 
 });

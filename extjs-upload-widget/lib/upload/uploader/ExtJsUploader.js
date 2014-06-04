@@ -81,15 +81,17 @@ Ext.define('Ext.ux.upload.uploader.ExtJsUploader', {
 
     generateURL: function(item, _callback) {
 
-        var vo = 'vo.indicate-project.eu';
+        //var vo = 'vo.indicate-project.eu';
+        var vo = Uploader.Configs.vo;
         //console.log("sono in generateURL");
         //console.log(item.getFileApiObject().name);
-        console.log(item.name);
+        //console.log(item.name);
         var filename = item.getFileApiObject().name.replace(/ /g, "_");
         console.log(filename);
-        var se = 'infn-se-03.ct.pi2s2.it';
-        var se_path = '/dpm/ct.pi2s2.it/home/vo.indicate-project.eu/glibrary'; 
-
+        console.log("Default Storage: " + Uploader.Configs.defaultSE);
+        var se = Uploader.Configs.defaultSE;
+        //var se_path = '/dpm/ct.pi2s2.it/home/vo.indicate-project.eu/glibrary'; 
+        var se_path = Uploader.Configs.defaultSEPath;
         //var url = '/dm/put/' + vo +'/' + filename + '/' + se + se_path;
         var url = 'http://glibrary.ct.infn.it/dm/put/' + vo +'/' + filename + '/' + se + se_path;
 
@@ -125,6 +127,15 @@ Ext.define('Ext.ux.upload.uploader.ExtJsUploader', {
                     }
                 
                 }
+            },
+            failure: function(response) {
+                var info = {
+                    success : false,
+                    message : 'Error white generating Storage TURL: ' + response.statusText,
+                    response : response
+                };
+                console.log(response);
+                this.fireEvent('uploadfailure', item, info);
             }
         });
 

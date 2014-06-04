@@ -81,6 +81,7 @@ Ext.define('Uploader.controller.Main', {
 	},
 
 	saveMetadata: function() {
+		console.log("save metadata")
 		var typestree = Ext.ComponentQuery.query('typestree')[0];
 		var selectedType = typestree.getSelectionModel().getSelection()[0];
 		if (!selectedType || selectedType.data.depth == 0) {

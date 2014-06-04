@@ -35,12 +35,17 @@ Ext.define('Ext.ux.upload.BrowseButton', {
             }
 
             // Allow picking multiple files at once.
-            this.fileInputEl.dom.setAttribute('multiple', '1');
+            console.log("rendered!!");
+            //this.fileInputEl.dom.setAttribute('multiple', '1');
+            this.fileInputEl.set({ multiple: true });
 
         }, this);
 
         this.on('change', function(field, value, options) {
+
             var files = this.fileInputEl.dom.files;
+            console.log("changed!! " + this.fileInputEl.dom);
+            //this.fileInputEl.dom.setAttribute('multiple', '1');
             if (files) {
                 this.fireEvent('fileselected', this, files);
             }

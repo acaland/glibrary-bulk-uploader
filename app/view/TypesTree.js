@@ -3,7 +3,7 @@ Ext.define('Uploader.view.TypesTree', {
     alias: 'widget.typestree',
     store: 'TypesTree',
     
-    title: 'Types',
+    title: 'Collections',
 	split: true,
     collapsible: true,
     useArrows: true

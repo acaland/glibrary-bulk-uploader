@@ -19,7 +19,7 @@ Ext.define('Ext.ux.upload.Queue', {
         this.callParent(arguments);
 
         this.addEvents({
-            multiadd : true,
+            //multiadd : true,
             multiremove : true,
             queuechange : true,
             itemchangestatus : true,
@@ -52,7 +52,7 @@ Ext.define('Ext.ux.upload.Queue', {
 
         this.addAll(items);
 
-        this.fireEvent('multiadd', this, items);
+        //this.fireEvent('multiadd', this, items);
         this.fireEvent('queuechange', this);
     },
 
